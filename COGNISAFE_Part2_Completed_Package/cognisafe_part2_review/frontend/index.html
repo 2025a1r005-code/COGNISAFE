@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CogniSafe | Fraud Detection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h2 class="brand">CogniSafe</h2>
+        <span class="status"><span class="dot"></span> Fraud Detection System</span>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="badge">SMART FRAUD ANALYSIS</div>
+            <h1>Stay safe from <span>digital fraud.</span></h1>
+            <p>Analyze suspicious links and messages to identify potential phishing indicators before you act.</p>
+
+            <div class="mode-switch" role="group" aria-label="Analysis type">
+                <button type="button" id="urlModeBtn" class="mode-btn active" aria-pressed="true">
+                    🌐 URL Analysis
+                </button>
+                <button type="button" id="messageModeBtn" class="mode-btn" aria-pressed="false">
+                    💬 Message Analysis
+                </button>
+            </div>
+
+            <form id="urlForm">
+                <label for="urlInput">Website URL</label>
+                <div class="input-row">
+                    <input
+                        type="text"
+                        id="urlInput"
+                        placeholder="https://example.com"
+                        autocomplete="url"
+                        required
+                    >
+                    <button type="submit" id="analyzeBtn">Analyze URL ↗</button>
+                </div>
+                <small>Enter a complete URL, including https:// or http://</small>
+            </form>
+
+            <form id="messageForm" class="hidden">
+                <label for="messageInput">Suspicious message</label>
+                <textarea
+                    id="messageInput"
+                    rows="5"
+                    maxlength="10000"
+                    placeholder="Paste a suspicious SMS, email, or message here..."
+                ></textarea>
+                <div class="input-row">
+                    <small>Maximum 10,000 characters</small>
+                    <button type="submit" id="analyzeMessageBtn">Analyze Message ↗</button>
+                </div>
+            </form>
+
+            <div id="errorMessage" class="error hidden" role="alert"></div>
+
+            <section id="result" class="result hidden" aria-live="polite">
+                <div class="result-heading">
+                    <h2>Analysis Results</h2>
+                    <span id="riskLevel" class="risk-badge">Low Risk</span>
+                </div>
+
+                <div class="score-card">
+                    <div>
+                        <p class="muted">Risk score</p>
+                        <strong><span id="riskScore">0</span><small> / 100</small></strong>
+                    </div>
+                    <div id="scoreIcon" class="score-icon">✓</div>
+                </div>
+
+                <div class="result-section">
+                    <h3>Detected indicators</h3>
+                    <ul id="reasonsList"></ul>
+                </div>
+
+                <div class="recommendation">
+                    <h3>Recommendation</h3>
+                    <p id="recommendationText"></p>
+                </div>
+
+                <p id="resultSource" class="muted"></p>
+
+                <p class="disclaimer">
+                    This analysis is not a guarantee of safety. Never share passwords,
+                    OTPs, or payment details with unverified sources.
+                </p>
+            </section>
+        </section>
+
+        <section class="features">
+            <article>
+                <div class="feature-icon">🔎</div>
+                <h3>URL Analysis</h3>
+                <p>Check links for suspicious patterns and configured fraud indicators.</p>
+            </article>
+
+            <article>
+                <div class="feature-icon">💬</div>
+                <h3>Message Analysis</h3>
+                <p>Check suspicious texts and emails for potential warning signs.</p>
+            </article>
+
+            <article>
+                <div class="feature-icon">🔐</div>
+                <h3>Security Awareness</h3>
+                <p>Understand potential risks and learn how to protect yourself.</p>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <p>CogniSafe · Fraud Risk Analysis</p>
+        <p>Mock or rule-based results are not guaranteed to identify every threat.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
