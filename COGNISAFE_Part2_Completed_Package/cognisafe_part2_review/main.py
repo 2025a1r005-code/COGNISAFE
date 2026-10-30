@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from ai_engine import predict_message_spam_probability
 from pydantic import BaseModel, Field, HttpUrl
 
 
@@ -86,7 +87,7 @@ def get_recommendation(score: int) -> str:
 
 # -------------------- MESSAGE FRAUD DETECTION --------------------
 
-def detect_message_fraud(text: str) -> dict:
+def detect_message_fraud_rules(text: str) -> dict:
     """Analyze message text using transparent rule-based indicators."""
 
     message = text.lower()
@@ -370,7 +371,24 @@ def detect_url_fraud(url: str) -> dict:
 
 
 # -------------------- API ENDPOINTS --------------------
-
+def detect_message_fraud(text: str) -> dict:
+    rules = detect_message_fraud_rules(text)
+    try:
+        probability = predict_message_spam_probability(text)
+    except Exception:
+        rules["detection_method"] = "rule_based_fallback"
+        return rules
+    score = int(round(probability * 100))
+    reasons = [f"The trained message model estimated a {score}% likelihood of spam or fraud."]
+    if rules["risk_score"] > 0:
+        reasons += rules["reasons"]
+    return {
+        "risk_score": score,
+        "risk_level": get_risk_level(score),
+        "reasons": reasons,
+        "recommendation": get_recommendation(score),
+        "detection_method": "naive_bayes_message_model",
+    }
 @app.get("/")
 def root():
     return {
