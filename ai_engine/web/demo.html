@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COGNISAFE demo</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 720px; margin: 30px auto; padding: 0 16px; color: #222; }
+  h1 { margin-bottom: 4px; }
+  .note { background: #fff8e1; border: 1px solid #f0d58c; padding: 10px; border-radius: 6px; font-size: 14px; }
+  textarea { width: 100%; height: 110px; margin-top: 12px; padding: 8px; box-sizing: border-box; font-size: 15px; }
+  button { margin-top: 10px; padding: 10px 18px; font-size: 15px; cursor: pointer; }
+  #result { margin-top: 20px; }
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: 14px; }
+  .Low { border-left: 8px solid #4caf50; }
+  .Medium { border-left: 8px solid #ff9800; }
+  .High { border-left: 8px solid #e53935; }
+  .error { color: #b71c1c; }
+  .limits { font-size: 13px; color: #555; margin-top: 10px; }
+</style>
+</head>
+<body>
+  <h1>COGNISAFE</h1>
+  <p>Learning prototype: check a suspicious message or URL.</p>
+  <div class="note">
+    The score is a rough warning signal, <b>not</b> a probability of fraud.
+    A low score does <b>not</b> mean something is safe. URLs are only read as text and never opened.
+  </div>
+
+  <p>
+    <label><input type="radio" name="kind" value="message" checked> Message</label>
+    <label><input type="radio" name="kind" value="url"> URL</label>
+  </p>
+
+  <textarea id="input" placeholder="Paste a message or URL here (text only)"></textarea>
+  <br>
+  <button id="go">Analyze</button>
+
+  <div id="result"></div>
+
+<script>
+  const input = document.getElementById("input");
+  const resultDiv = document.getElementById("result");
+
+  function clearResult() {
+    while (resultDiv.firstChild) resultDiv.removeChild(resultDiv.firstChild);
+  }
+
+  function addLine(parent, tag, text, className) {
+    const el = document.createElement(tag);
+    el.textContent = text;            // textContent keeps all text harmless
+    if (className) el.className = className;
+    parent.appendChild(el);
+    return el;
+  }
+
+  function showError(message) {
+    clearResult();
+    addLine(resultDiv, "p", message, "error");
+  }
+
+  function showResult(data) {
+    clearResult();
+    const card = document.createElement("div");
+    card.className = "card " + data.risk_level;
+    addLine(card, "h2", "Warning level: " + data.risk_level);
+    addLine(card, "p", "Score: " + data.risk_score + " / 100 (not a probability)");
+    addLine(card, "p", "Category: " + data.category);
+    addLine(card, "h3", "Why");
+    const list = document.createElement("ul");
+    data.reasons.forEach(function (reason) { addLine(list, "li", reason); });
+    card.appendChild(list);
+    addLine(card, "h3", "What to do");
+    addLine(card, "p", data.recommendation);
+    addLine(card, "p", data.limitations, "limits");
+    resultDiv.appendChild(card);
+  }
+
+  async function analyze() {
+    const kind = document.querySelector('input[name="kind"]:checked').value;
+    const endpoint = kind === "message" ? "/api/v1/analyze/message" : "/api/v1/analyze/url";
+    const body = kind === "message" ? { text: input.value } : { url: input.value };
+    clearResult();
+    addLine(resultDiv, "p", "Checking...");
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        showError(data.error ? data.error.message : "Something went wrong.");
+        return;
+      }
+      showResult(data);
+    } catch (e) {
+      showError("Could not reach the service. Is it running?");
+    }
+  }
+
+  document.getElementById("go").addEventListener("click", analyze);
+</script>
+</body>
+</html>
